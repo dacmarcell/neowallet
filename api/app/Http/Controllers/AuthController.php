@@ -13,9 +13,6 @@ class AuthController extends Controller
         private AuthService $authService
     ) {}
 
-    /**
-     * Login user and create session.
-     */
     public function login(LoginRequest $request): AuthResource
     {
         $user = $this->authService->login($request->validated());
@@ -23,9 +20,6 @@ class AuthController extends Controller
         return new AuthResource($user);
     }
 
-    /**
-     * Logout user and destroy session.
-     */
     public function logout(): JsonResponse
     {
         $this->authService->logout();
@@ -33,9 +27,6 @@ class AuthController extends Controller
         return response()->json(['message' => 'Successfully logged out']);
     }
 
-    /**
-     * Get the authenticated user.
-     */
     public function me(): AuthResource
     {
         $user = $this->authService->getCurrentUser();
