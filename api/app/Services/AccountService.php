@@ -6,7 +6,6 @@ use App\Models\Account;
 use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use Log;
 
 class AccountService
 {
