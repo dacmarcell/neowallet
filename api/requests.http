@@ -5,10 +5,12 @@
 ### Get Users
 
 GET {{host}}/v1/users
+Accept: application/json
 
 ### Create User
 
 POST {{host}}/v1/users
+Accept: application/json
 Content-Type: application/json
 
 {
@@ -19,6 +21,7 @@ Content-Type: application/json
 
 ### Update User
 PATCH {{host}}v1/users/1
+Accept: application/json
 Content-Type: application/json
 
 {
@@ -27,4 +30,25 @@ Content-Type: application/json
 
 ### Delete User
 DELETE {{host}}/v1/users/1
+Accept: application/json
 
+#### Authentication
+
+### Login
+
+POST {{host}}/v1/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+    "email": "john.doe@example.com",
+    "password": "password"
+}
+
+### Logout
+POST {{host}}/v1/auth/logout
+Accept: application/json
+
+### Me
+GET {{host}}/v1/auth/me
+Accept: application/json

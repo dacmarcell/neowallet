@@ -5,17 +5,21 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserRequest;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
-use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
 {
+    public function __construct(
+        private UserService $userService
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
     public function index(): UserCollection
     {
-        $users = User::all();
+        $users = $this->userService->getAllUsers();
 
         return new UserCollection($users);
     }
@@ -25,7 +29,7 @@ class UserController extends Controller
      */
     public function store(UserRequest $request): UserResource
     {
-        $user = User::create($request->validated());
+        $user = $this->userService->createUser($request->validated());
 
         return new UserResource($user);
     }
@@ -33,17 +37,20 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $user): UserResource
+    public function show(int $id): UserResource
     {
+        $user = $this->userService->getUserById($id);
+
         return new UserResource($user);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UserRequest $request, User $user): UserResource
+    public function update(UserRequest $request, int $id): UserResource
     {
-        $user->update($request->validated());
+        $user = $this->userService->getUserById($id);
+        $user = $this->userService->updateUser($user, $request->validated());
 
         return new UserResource($user);
     }
@@ -51,9 +58,10 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
-        $user->delete();
+        $user = $this->userService->getUserById($id);
+        $this->userService->deleteUser($user);
 
         return response()->json(null, 204);
     }
