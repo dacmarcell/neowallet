@@ -52,3 +52,69 @@ Accept: application/json
 ### Me
 GET {{host}}/v1/auth/me
 Accept: application/json
+
+#### Transactions and Deposits
+
+### Get Accounts
+GET {{host}}/v1/accounts
+Accept: application/json
+
+### Create Account
+POST {{host}}/v1/accounts
+Accept: application/json
+Content-Type: application/json
+
+{
+    "user_id": 2,
+    "balance": 100
+}
+
+### Account Deposit
+POST {{host}}/v1/accounts/deposit
+Accept: application/json
+Content-Type: application/json
+
+{
+    "account_id": 4,
+    "amount": 100.00
+}
+
+### Get Account by ID
+GET {{host}}/v1/accounts/1
+Accept: application/json
+
+### Update Account
+PATCH {{host}}/v1/accounts/1
+Accept: application/json
+Content-Type: application/json
+
+{
+    "balance": 300.00
+}
+
+### Delete Account
+DELETE {{host}}/v1/accounts/1
+Accept: application/json
+
+### Account Transfer
+POST {{host}}/v1/accounts/transfer
+Accept: application/json
+Content-Type: application/json
+
+{
+    "origin_account_id": 1,
+    "destination_account_id": 2,
+    "amount": 50.00
+}
+
+### Get Transactions
+GET {{host}}/v1/transactions
+Accept: application/json
+
+### Get Transaction by ID
+GET {{host}}/v1/transactions/1
+Accept: application/json
+
+### Reverse Transaction
+POST {{host}}/v1/transactions/1/reverse
+Accept: application/json
