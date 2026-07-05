@@ -1,0 +1,30 @@
+@host = http://localhost:8000/api
+
+#### Users
+
+### Get Users
+
+GET {{host}}/v1/users
+
+### Create User
+
+POST {{host}}/v1/users
+Content-Type: application/json
+
+{
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "password": "password"
+}
+
+### Update User
+PATCH {{host}}v1/users/1
+Content-Type: application/json
+
+{
+    "name": "Jane Doe"
+}
+
+### Delete User
+DELETE {{host}}/v1/users/1
+
