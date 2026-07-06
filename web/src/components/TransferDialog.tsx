@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { brl } from "../lib/format";
@@ -12,12 +12,12 @@ import {
 } from "./ui/Dialog";
 import { Label } from "./ui/Label";
 import { Input } from "./ui/Input";
+import { userService, type User } from "../services/user.service";
 
-const accountIdSchema = z
+const usernameSchema = z
   .string()
-  .min(1, "ID da conta é obrigatório")
-  .transform((val) => parseInt(val, 10))
-  .refine((val) => !isNaN(val), "ID deve ser um número válido");
+  .min(3, "Username deve ter pelo menos 3 caracteres")
+  .max(50);
 const amountSchema = z
   .number()
   .positive("Valor deve ser maior que zero")
@@ -28,7 +28,7 @@ interface Props {
   onOpenChange: (v: boolean) => void;
   maxAmount: number;
   onSubmit: (input: {
-    destinationAccountId: number;
+    destinationAccountUsername: string;
     amount: number;
   }) => Promise<void>;
   pending: boolean;
@@ -44,13 +44,45 @@ export function TransferDialog({
   const [username, setUsername] = useState("");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const searchUsers = useCallback(async (query: string) => {
+    if (query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const results = await userService.searchUsers(query);
+      setSuggestions(results);
+      setShowSuggestions(results.length > 0);
+    } catch (e) {
+      setSuggestions([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (username && !selectedUser) {
+        searchUsers(username);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [username, selectedUser, searchUsers]);
 
   const handle = async () => {
     setError(null);
 
-    const accountId = accountIdSchema.safeParse(username);
-    if (!accountId.success) {
-      return setError(accountId.error.issues[0].message);
+    const u = usernameSchema.safeParse(username);
+    if (!u.success) {
+      return setError(u.error.issues[0].message);
+    }
+
+    if (!selectedUser) {
+      return setError("Selecione um destinatário válido");
     }
 
     const a = amountSchema.safeParse(Number(amount.replace(",", ".")));
@@ -63,15 +95,24 @@ export function TransferDialog({
 
     try {
       await onSubmit({
-        destinationAccountId: accountId.data,
+        destinationAccountUsername: selectedUser.username,
         amount: a.data,
       });
       setUsername("");
       setAmount("");
+      setSelectedUser(null);
+      setSuggestions([]);
       toast.success("Transferência realizada com sucesso");
     } catch (e) {
       toast.error("Erro ao realizar transferência");
     }
+  };
+
+  const handleSelectUser = (user: User) => {
+    setUsername(user.username);
+    setSelectedUser(user);
+    setShowSuggestions(false);
+    setSuggestions([]);
   };
 
   return (
@@ -87,14 +128,44 @@ export function TransferDialog({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Destinatário</Label>
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">@</span>
-              <Input
-                placeholder="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                autoFocus
-              />
+            <div className="relative">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">@</span>
+                <Input
+                  placeholder="username"
+                  value={username}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    setSelectedUser(null);
+                  }}
+                  onFocus={() => {
+                    if (suggestions.length > 0) setShowSuggestions(true);
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => setShowSuggestions(false), 200);
+                  }}
+                  autoFocus
+                />
+              </div>
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-background border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {suggestions.map((user) => (
+                    <button
+                      key={user.id}
+                      type="button"
+                      onClick={() => handleSelectUser(user)}
+                      className="w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">@{user.username}</span>
+                        <span className="text-gray-500 text-sm">
+                          ({user.name})
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <div className="space-y-2">
