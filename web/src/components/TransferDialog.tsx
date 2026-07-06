@@ -148,17 +148,20 @@ export function TransferDialog({
                 />
               </div>
               {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-background border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                <div
+                  data-state={showSuggestions ? "open" : "closed"}
+                  className="absolute z-10 w-full mt-1 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto origin-top data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:pointer-events-none duration-200"
+                >
                   {suggestions.map((user) => (
                     <button
                       key={user.id}
                       type="button"
                       onClick={() => handleSelectUser(user)}
-                      className="w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors"
+                      className="w-full px-4 py-2 text-left hover:bg-muted transition-colors first:rounded-t-lg last:rounded-b-lg"
                     >
                       <div className="flex items-center gap-2">
                         <span className="font-medium">@{user.username}</span>
-                        <span className="text-gray-500 text-sm">
+                        <span className="text-muted-foreground text-sm">
                           ({user.name})
                         </span>
                       </div>
