@@ -23,12 +23,14 @@ class UserRequest extends FormRequest
     {
         $rules = [
             "name" => ["required", "string", "max:255"],
+            "username" => ["required", "string", "max:100"],
             "email" => ["required", "string", "email", "max:255", Rule::unique("users", "email")],
             "password" => ["required", "string", Password::defaults()],
         ];
 
         if($this->isMethod("PUT") || $this->isMethod("PATCH")){
             $rules["name"] = ["sometimes", "string", "max:255"];
+            $rules["username"] = ["sometimes", "string", "max:100"];
             $rules["email"] = ["sometimes", "string", "email", "max:255", Rule::unique("users", "email")->ignore($this->route("id"))];
             $rules["password"] = ["sometimes", "string", Password::defaults()];
         }
@@ -47,6 +49,9 @@ class UserRequest extends FormRequest
             'name.required' => 'The name field is required.',
             'name.string' => 'The name must be a string.',
             'name.max' => 'The name may not be greater than 255 characters.',
+            'username.required' => 'The username field is required.',
+            'username.string' => 'The username must be a string.',
+            'username.max' => 'The username may not be greater than 100 characters.',
             'email.required' => 'The email field is required.',
             'email.string' => 'The email must be a string.',
             'email.email' => 'The email must be a valid email address.',
