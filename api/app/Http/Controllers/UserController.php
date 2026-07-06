@@ -51,10 +51,10 @@ class UserController extends Controller
         return response()->json(null, 204);
     }
 
-    public function search(): UserCollection
+    public function transferSearch(): UserCollection
     {
         $query = request()->query('q');
-        $users = $this->userService->searchUsers($query);
+        $users = $this->userService->searchUsersForTransfer($query);
 
         return new UserCollection($users);
     }

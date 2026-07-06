@@ -21,7 +21,7 @@ export const userService = {
     }
 
     const response = await api.get(
-      `/v1/users/search?q=${encodeURIComponent(query)}`,
+      `/v1/users/transfer-search?q=${encodeURIComponent(query)}`,
     );
     const data = await response.json();
     return data.data || [];

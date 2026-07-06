@@ -42,15 +42,14 @@ class UserService
         $user->delete();
     }
 
-    public function searchUsers(?string $query): Collection
+    public function searchUsersForTransfer(?string $query): Collection
     {
         if (!$query) {
             return collect();
         }
 
-        return User::where('username', 'like', "%{$query}%")
-            ->orWhere('name', 'like', "%{$query}%")
-            ->limit(10)
-            ->get();
+        return User::where("id", "!=", auth()->id)->where(function ($q) use ($query) {
+            $q->where("username", "like", "%{$query}%");
+        })->limit(10)->get();
     }
 }
