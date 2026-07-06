@@ -55,14 +55,14 @@ export default function Dashboard() {
   };
 
   const handleTransfer = async (input: {
-    destinationAccountId: number;
+    destinationAccountUsername: string;
     amount: number;
   }) => {
     setTransferPending(true);
     try {
       await walletService.transfer(
         wallet!.id,
-        input.destinationAccountId,
+        input.destinationAccountUsername,
         input.amount,
       );
       await fetchData();
