@@ -31,10 +31,8 @@ Route::prefix('v1')->group(function () {
         Route::put('accounts/{account}', [AccountController::class, 'update']);
         Route::patch('accounts/{account}', [AccountController::class, 'update']);
         Route::delete('accounts/{account}', [AccountController::class, 'destroy']);
-        Route::middleware('idempotency')->group(function () {
-            Route::post('accounts/deposit', [AccountController::class, 'deposit']);
-            Route::post('accounts/transfer', [AccountController::class, 'transfer']);
-        });
+        Route::post('accounts/deposit', [AccountController::class, 'deposit']);
+        Route::post('accounts/transfer', [AccountController::class, 'transfer']);
 
         // Transactions
         Route::get('transactions', [TransactionController::class, 'index']);
