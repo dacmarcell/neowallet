@@ -4,8 +4,11 @@ namespace App\Services;
 
 use App\Models\Account;
 use App\Models\Transaction;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 
 class AccountService
 {
@@ -55,17 +58,21 @@ class AccountService
 
     public function transfer(Account $origin, Account $destination, float $amount): Transaction
     {
+        if ($origin->id === $destination->id) {
+            throw new InvalidArgumentException('Você não pode transferir para sua própria conta.');
+        }
+
         return DB::transaction(function () use ($origin, $destination, $amount) {
             $origin = Account::lockForUpdate()->find($origin->id);
             $destination = Account::lockForUpdate()->find($destination->id);
 
             if ($origin->balance < $amount) {
-                throw new \Exception('Insufficient balance');
+                throw new Exception('Saldo insuficiente');
             }
 
             $origin->balance -= $amount;
             $destination->balance += $amount;
-
+            
             $origin->save();
             $destination->save();
 
@@ -84,7 +91,7 @@ class AccountService
     {
         return DB::transaction(function () use ($transaction) {
             if ($transaction->reversed) {
-                throw new \Exception('Transaction already reversed');
+                throw new Exception('Essa transação já foi revertida');
             }
 
             if ($transaction->type === 'deposit') {
@@ -103,7 +110,7 @@ class AccountService
             }
 
             $transaction->reversed = true;
-            $transaction->reversed_at = \Illuminate\Support\Carbon::now();
+            $transaction->reversed_at = Carbon::now();
             $transaction->save();
 
             return $transaction->fresh();
