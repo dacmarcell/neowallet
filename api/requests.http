@@ -97,6 +97,10 @@ Content-Type: application/json
 DELETE {{host}}/v1/accounts/1
 Accept: application/json
 
+### Get User Account
+GET {{host}}/v1/accounts/me
+Accept: application/json
+
 ### Account Transfer
 POST {{host}}/v1/accounts/transfer
 Accept: application/json
