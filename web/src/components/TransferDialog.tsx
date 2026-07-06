@@ -47,6 +47,7 @@ export function TransferDialog({
   const [suggestions, setSuggestions] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   const searchUsers = useCallback(async (query: string) => {
     if (query.length < 2) {
@@ -55,10 +56,12 @@ export function TransferDialog({
     }
 
     try {
+      setSearchError("");
       const results = await userService.searchUsers(query);
       setSuggestions(results);
       setShowSuggestions(results.length > 0);
     } catch (e) {
+      setSearchError(e.message);
       setSuggestions([]);
     }
   }, []);
@@ -147,6 +150,9 @@ export function TransferDialog({
                   autoFocus
                 />
               </div>
+              {searchError ? (
+                <p className="text-xs text-destructive mt-1">{searchError}</p>
+              ) : null}
               {showSuggestions && suggestions.length > 0 && (
                 <div
                   data-state={showSuggestions ? "open" : "closed"}
