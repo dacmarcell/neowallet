@@ -27,21 +27,33 @@ export default function Dashboard() {
   const [depositPending, setDepositPending] = useState(false);
   const [transferPending, setTransferPending] = useState(false);
   const [reversingId, setReversingId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [totalTransactions, setTotalTransactions] = useState(0);
   const { logout } = useAuthSession();
 
-  const fetchData = async () => {
+  const fetchData = async (page = 1) => {
     try {
       const [walletData, transactionsData] = await Promise.all([
         walletService.getMyWallet(),
-        walletService.listTransactions(),
+        walletService.listTransactions(page),
       ]);
+
       setWallet(walletData);
-      setTransactions(transactionsData);
+      setTransactions(transactionsData.data);
+      setCurrentPage(transactionsData.current_page);
+      setLastPage(transactionsData.last_page);
+      setTotalTransactions(transactionsData.total);
     } catch (err) {
       console.error("Erro ao carregar dados", err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setLoading(true);
+    fetchData(page);
   };
 
   const handleDeposit = async (amount: number) => {
@@ -173,7 +185,7 @@ export default function Dashboard() {
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-semibold">Extrato</h3>
             <p className="text-xs text-gray-500">
-              {transactions.length} transações
+              {totalTransactions} transações
             </p>
           </div>
           <TransactionsList
@@ -182,6 +194,9 @@ export default function Dashboard() {
             onReverse={handleReverse}
             reversingId={reversingId}
             loading={loading}
+            currentPage={currentPage}
+            lastPage={lastPage}
+            onPageChange={handlePageChange}
           />
         </section>
       </main>

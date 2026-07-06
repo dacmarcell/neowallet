@@ -30,15 +30,20 @@ export class WalletServiceError extends Error {
 
 export const walletService = {
   async getMyWallet(): Promise<Wallet> {
-    const response = await api.get(`/v1/accounts`);
+    const response = await api.get(`/v1/accounts/me`);
     const data = await response.json();
-    return data.data[0];
+    return data.data;
   },
 
-  async listTransactions(): Promise<Transaction[]> {
-    const response = await api.get(`/v1/transactions`);
+  async listTransactions(page = 1): Promise<{
+    data: Transaction[];
+    current_page: number;
+    last_page: number;
+    total: number;
+  }> {
+    const response = await api.get(`/v1/transactions?page=${page}`);
     const data = await response.json();
-    return data.data || [];
+    return data;
   },
 
   async deposit(accountId: number, amount: number): Promise<Transaction> {

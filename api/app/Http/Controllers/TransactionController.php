@@ -12,9 +12,9 @@ class TransactionController extends Controller
         private TransactionService $transactionService
     ) {}
 
-    public function index(): TransactionCollection
+    public function index(int $page = 1): TransactionCollection
     {
-        $transactions = $this->transactionService->getAllTransactions();
+        $transactions = $this->transactionService->getAllTransactions($page);
         return new TransactionCollection($transactions);
     }
 

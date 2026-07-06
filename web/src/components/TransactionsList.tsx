@@ -9,6 +9,9 @@ interface Props {
   onReverse: (id: number) => void;
   reversingId: number | null;
   loading: boolean;
+  currentPage: number;
+  lastPage: number;
+  onPageChange: (page: number) => void;
 }
 
 export function TransactionsList({
@@ -17,6 +20,9 @@ export function TransactionsList({
   onReverse,
   reversingId,
   loading,
+  currentPage,
+  lastPage,
+  onPageChange,
 }: Props) {
   if (loading) {
     return (
@@ -38,17 +44,43 @@ export function TransactionsList({
   }
 
   return (
-    <ul className="space-y-2">
-      {transactions.map((t) => (
-        <TransactionRow
-          key={t.id}
-          tx={t}
-          currentAccountId={currentAccountId}
-          onReverse={onReverse}
-          reversing={reversingId === t.id}
-        />
-      ))}
-    </ul>
+    <div className="space-y-4">
+      <ul className="space-y-2">
+        {transactions.map((t) => (
+          <TransactionRow
+            key={t.id}
+            tx={t}
+            currentAccountId={currentAccountId}
+            onReverse={onReverse}
+            reversing={reversingId === t.id}
+          />
+        ))}
+      </ul>
+
+      {lastPage > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentPage === 1}
+            onClick={() => onPageChange(currentPage - 1)}
+          >
+            Anterior
+          </Button>
+          <span className="text-xs text-gray-500">
+            {currentPage} de {lastPage}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentPage === lastPage}
+            onClick={() => onPageChange(currentPage + 1)}
+          >
+            Próxima
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }
 
