@@ -9,6 +9,7 @@ use App\Http\Resources\AccountCollection;
 use App\Http\Resources\AccountResource;
 use App\Http\Resources\TransactionResource;
 use App\Models\Account;
+use App\Models\User;
 use App\Services\AccountService;
 use Illuminate\Http\JsonResponse;
 use Log;
@@ -61,7 +62,8 @@ class AccountController extends Controller
     public function transfer(TransferRequest $request): TransactionResource
     {
         $origin = Account::findOrFail($request->origin_account_id);
-        $destination = Account::findOrFail($request->destination_account_id);
+        $destinationUser = User::where('username', $request->destination_username)->firstOrFail();
+        $destination = Account::where('user_id', $destinationUser->id)->firstOrFail();
         $transaction = $this->accountService->transfer($origin, $destination, $request->amount);
         return new TransactionResource($transaction);
     }

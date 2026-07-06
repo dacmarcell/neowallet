@@ -15,7 +15,7 @@ class TransferRequest extends FormRequest
     {
         return [
             'origin_account_id' => ['required', 'exists:accounts,id'],
-            'destination_account_id' => ['required', 'exists:accounts,id', 'different:origin_account_id'],
+            'destination_username' => ['required', 'exists:users,username'],
             'amount' => ['required', 'numeric', 'gt:0'],
         ];
     }
@@ -25,9 +25,8 @@ class TransferRequest extends FormRequest
         return [
             'origin_account_id.required' => 'The origin account ID field is required.',
             'origin_account_id.exists' => 'The origin account does not exist.',
-            'destination_account_id.required' => 'The destination account ID field is required.',
-            'destination_account_id.exists' => 'The destination account does not exist.',
-            'destination_account_id.different' => 'The destination account must be different from the origin account.',
+            'destination_username.required' => 'The destination username field is required.',
+            'destination_username.exists' => 'The destination user does not exist.',
             'amount.required' => 'The amount field is required.',
             'amount.numeric' => 'The amount must be a number.',
             'amount.gt' => 'The amount must be greater than 0.',
