@@ -30,21 +30,44 @@ export function DepositDialog({
   onSubmit,
   pending,
 }: Props) {
-  const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [cents, setCents] = useState(0);
+
+  const displayed = cents === 0 ? "" : formatBRL(cents);
 
   const handle = async () => {
     setError(null);
-    const parsed = schema.safeParse(Number(value.replace(",", ".")));
+
+    const amount = cents / 100;
+    const parsed = schema.safeParse(amount);
+
     if (!parsed.success) return setError(parsed.error.issues[0].message);
     try {
       await onSubmit(parsed.data);
-      setValue("");
+      setCents(0);
       toast.success("Depósito realizado com sucesso");
     } catch (e) {
       toast.error("Erro ao realizar depósito");
     }
   };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, "");
+    if (digits === "") return setCents(0);
+
+    const next = parseInt(digits, 10);
+    if (next > 1_000_000 * 100) return;
+
+    setCents(next);
+    setError(null);
+  };
+
+  function formatBRL(cents: number): string {
+    return (cents / 100).toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -62,8 +85,8 @@ export function DepositDialog({
             <Input
               inputMode="decimal"
               placeholder="0,00"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
+              value={displayed}
+              onChange={handleChange}
               autoFocus
             />
             {error && <p className="text-xs text-destructive">{error}</p>}
