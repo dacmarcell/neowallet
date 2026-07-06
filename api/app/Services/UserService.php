@@ -41,4 +41,16 @@ class UserService
     {
         $user->delete();
     }
+
+    public function searchUsers(?string $query): Collection
+    {
+        if (!$query) {
+            return collect();
+        }
+
+        return User::where('username', 'like', "%{$query}%")
+            ->orWhere('name', 'like', "%{$query}%")
+            ->limit(10)
+            ->get();
+    }
 }

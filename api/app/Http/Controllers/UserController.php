@@ -50,4 +50,12 @@ class UserController extends Controller
 
         return response()->json(null, 204);
     }
+
+    public function search(): UserCollection
+    {
+        $query = request()->query('q');
+        $users = $this->userService->searchUsers($query);
+
+        return new UserCollection($users);
+    }
 }
