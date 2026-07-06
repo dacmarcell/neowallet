@@ -1,3 +1,13 @@
+class ApiError extends Error {
+  public readonly status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 async function fetcher(
   endpoint: string,
   options?: RequestInit,
@@ -16,6 +26,11 @@ async function fetcher(
     }
 
     return response;
+  }
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new ApiError(response.status, data.message ?? "Requisição falhou");
   }
 
   return response;
