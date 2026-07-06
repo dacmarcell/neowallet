@@ -29,7 +29,7 @@ export function TransactionsList({
   }
   if (transactions.length === 0) {
     return (
-      <div className="bg-white rounded-2xl p-12 text-center shadow">
+      <div className="rounded-2xl p-12 text-center shadow">
         <p className="text-sm text-gray-500">
           Nenhuma transação ainda. Faça seu primeiro depósito.
         </p>
