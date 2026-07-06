@@ -2,10 +2,23 @@ async function fetcher(
   endpoint: string,
   options?: RequestInit,
 ): Promise<Response> {
-  return await fetch(`http://localhost:8000/api${endpoint}`, {
+  const response = await fetch(`http://localhost:8000/api${endpoint}`, {
     ...options,
     credentials: "include",
   });
+
+  if (response.status === 401) {
+    const shouldRedirect =
+      window.location.pathname !== "/" && window.location.pathname !== "/auth";
+
+    if (shouldRedirect) {
+      window.location.href = "/";
+    }
+
+    return response;
+  }
+
+  return response;
 }
 
 export const api = {
