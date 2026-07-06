@@ -27,6 +27,7 @@ Route::prefix('v1')->group(function () {
 
         // Accounts
         Route::get('accounts', [AccountController::class, 'index']);
+        Route::get('accounts/me', [AccountController::class, 'me']);
         Route::get('accounts/{account}', [AccountController::class, 'show']);
         Route::post('accounts', [AccountController::class, 'store']);
         Route::put('accounts/{account}', [AccountController::class, 'update']);

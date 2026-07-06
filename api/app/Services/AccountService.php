@@ -17,6 +17,11 @@ class AccountService
         return Account::with('user')->get();
     }
 
+    public function me()
+    {
+        return Account::with("user")->where("user_id", auth()->user()->id)->first();
+    }
+
     public function getAccountById(int $id): Account
     {
         return Account::with('user')->findOrFail($id);

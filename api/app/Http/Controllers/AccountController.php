@@ -52,6 +52,12 @@ class AccountController extends Controller
         return response()->json(null, 204);
     }
 
+    public function me()
+    {
+        $account = $this->accountService->me();
+        return new AccountResource($account);
+    }
+
     public function deposit(DepositRequest $request): TransactionResource
     {
         $account = Account::findOrFail($request->account_id);
