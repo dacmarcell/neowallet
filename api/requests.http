@@ -15,7 +15,8 @@ Content-Type: application/json
 
 {
     "name": "John Doe",
-    "email": "john.doe@example.com",
+    "username":"johndoe",
+    "email": "johndoe@email.com",
     "password": "password"
 }
 
@@ -41,7 +42,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "email": "john.doe@example.com",
+    "email": "johndoe@email.com",
     "password": "password"
 }
 
