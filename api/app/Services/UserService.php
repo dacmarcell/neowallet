@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class UserService
 {
@@ -48,8 +49,23 @@ class UserService
             return collect();
         }
 
-        return User::where("id", "!=", auth()->id)->where(function ($q) use ($query) {
-            $q->where("username", "like", "%{$query}%");
-        })->limit(10)->get();
+        $loggedUserId = auth()->id();
+
+        $results = User::where('id', '!=', $loggedUserId)
+            ->where(function ($q) use ($query) {
+                $q->where('username', 'like', "%{$query}%");
+            })
+            ->limit(10)
+            ->get();
+
+        if ($results->isEmpty() && User::where('id', $loggedUserId)
+            ->where(function ($q) use ($query) {
+                $q->where('username', 'like', "%{$query}%");
+            })->exists()
+        ) {
+            throw new BadRequestHttpException('Você não pode transferir para si mesmo.');
+        }
+
+        return $results;
     }
 }
