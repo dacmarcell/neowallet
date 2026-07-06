@@ -52,12 +52,12 @@ export const walletService = {
 
   async transfer(
     originAccountId: number,
-    destinationAccountId: number,
+    destinationUsername: string,
     amount: number,
   ): Promise<Transaction> {
     const response = await api.post(`/v1/accounts/transfer`, {
       origin_account_id: originAccountId,
-      destination_account_id: destinationAccountId,
+      destination_username: destinationUsername,
       amount,
     });
     const data = await response.json();
