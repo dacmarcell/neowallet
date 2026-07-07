@@ -17,6 +17,14 @@ export interface Transaction {
   amount: string;
   origin_account_id: number | null;
   destination_account_id: number | null;
+  origin_account: {
+    user_id: number;
+    username: string;
+  };
+  destination_account: {
+    user_id: number;
+    username: string;
+  };
   reversed: boolean;
   created_at: string;
 }
