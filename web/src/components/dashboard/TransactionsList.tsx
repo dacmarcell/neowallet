@@ -2,6 +2,8 @@ import { ArrowDownLeft, ArrowUpRight, RefreshCw, Undo2 } from "lucide-react";
 import type { Transaction } from "../../services/wallet.service";
 import { brl, dateTime } from "../../lib/format";
 import { Button } from "../ui/Button";
+import ConfirmReverseDialog from "./ConfirmReverseDialog";
+import { useState } from "react";
 
 interface Props {
   transactions: Transaction[];
@@ -24,6 +26,16 @@ export function TransactionsList({
   lastPage,
   onPageChange,
 }: Props) {
+  const [pendingReversal, setPendingReversal] = useState<Transaction | null>(
+    null,
+  );
+
+  const handleConfirmReversal = () => {
+    if (!pendingReversal) return;
+    onReverse(pendingReversal.id);
+    setPendingReversal(null);
+  };
+
   if (loading) {
     return (
       <div className="space-y-2">
@@ -46,13 +58,13 @@ export function TransactionsList({
   return (
     <div className="space-y-4">
       <ul className="space-y-2">
-        {transactions.map((t) => (
+        {transactions.map((transaction) => (
           <TransactionRow
-            key={t.id}
-            tx={t}
+            key={transaction.id}
+            transaction={transaction}
             currentAccountId={currentAccountId}
-            onReverse={onReverse}
-            reversing={reversingId === t.id}
+            onRequestReverse={setPendingReversal}
+            reversing={reversingId === transaction.id}
           />
         ))}
       </ul>
@@ -80,24 +92,31 @@ export function TransactionsList({
           </Button>
         </div>
       )}
+
+      <ConfirmReverseDialog
+        reversingId={reversingId}
+        pendingReversal={pendingReversal}
+        setPendingReversal={setPendingReversal}
+        handleConfirmReversal={handleConfirmReversal}
+      />
     </div>
   );
 }
 
 function TransactionRow({
-  tx,
-  currentAccountId,
-  onReverse,
+  transaction,
   reversing,
+  currentAccountId,
+  onRequestReverse,
 }: {
-  tx: Transaction;
-  currentAccountId: number;
-  onReverse: (id: number) => void;
+  transaction: Transaction;
   reversing: boolean;
+  currentAccountId: number;
+  onRequestReverse: (transaction: Transaction) => void;
 }) {
-  const isIncoming = tx.destination_account_id === currentAccountId;
-  const meta = describe(tx, isIncoming);
-  const canReverse = !tx.reversed && tx.type !== "reversal";
+  const isIncoming = transaction.destination_account_id === currentAccountId;
+  const meta = describe(transaction, isIncoming);
+  const canReverse = !transaction.reversed && transaction.type !== "reversal";
 
   return (
     <li className="card-elevated flex items-center justify-between rounded-xl p-4">
@@ -109,22 +128,27 @@ function TransactionRow({
         </div>
         <div>
           <p className="text-sm font-medium">{meta.title}</p>
+          {transaction.origin_account?.username && (
+            <p className="text-xs text-gray-600">
+              @{transaction.origin_account.username}
+            </p>
+          )}
           <p className="text-xs text-gray-500">
-            {dateTime(tx.created_at)}
-            {tx.reversed ? " · revertida" : ""}
+            {dateTime(transaction.created_at)}
+            {transaction.reversed ? " · revertida" : ""}
           </p>
         </div>
       </div>
       <div className="flex items-center gap-3">
         <span
-          className={`font-semibold tabular-nums ${meta.amountColor} ${tx.reversed ? "line-through opacity-60" : ""}`}
+          className={`font-semibold tabular-nums ${meta.amountColor} ${transaction.reversed ? "line-through opacity-60" : ""}`}
         >
           {meta.sign}
-          {brl(tx.amount)}
+          {brl(transaction.amount)}
         </span>
         {canReverse && (
           <Button
-            onClick={() => onReverse(tx.id)}
+            onClick={() => onRequestReverse(transaction)}
             disabled={reversing}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
             title="Reverter"
@@ -165,6 +189,6 @@ function describe(tx: Transaction, isIncoming: boolean) {
     iconColor: isIncoming ? "text-indigo-600" : "text-red-600",
     title: isIncoming ? "Recebido" : "Enviado",
     sign: isIncoming ? "+" : "−",
-    amountColor: isIncoming ? "text-indigo-600" : "text-gray-900",
+    amountColor: isIncoming ? "text-green-600" : "text-red-600",
   };
 }
