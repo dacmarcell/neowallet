@@ -123,3 +123,22 @@ Accept: application/json
 ### Reverse Transaction
 POST {{host}}/v1/transactions/1/reverse
 Accept: application/json
+
+### Generate Receive Transaction Link
+POST {{host}}/v1/transactions/receive-link
+Accept: application/json
+Content-Type: application/json
+
+{
+    "origin_account_id": 7,
+    "amount": 100
+}
+
+### Decrypt Receive Transaction Link
+POST {{host}}/v1/transactions/decrypt-link
+Accept: application/json
+Content-Type: application/json
+
+{
+    "token":"eyJpdiI6IlIvRGU4RDdEVjVBcFFmV0dmSUQvdlE9PSIsInZhbHVlIjoicWM1UlhzM0lqQ01DNXd2Yk1TazNZejQ4Ym1tL1VwYUF6Qk9mU2tuSEZrcDA3TWNiOU0vOUhaQThTMFM3Tkc1Rm5LTE91TVBVS0FFa3dNZWN1aEkxZ3c9PSIsIm1hYyI6ImMzMGNkNjIxOTU3MWYyNTUyYTBkYjUwMmQwNzZjNjdjMDk1NjE5ZGQ1YmE5MDE2YWQzODg5MTVhZTE0OGZiOTMiLCJ0YWciOiIifQ=="
+}
