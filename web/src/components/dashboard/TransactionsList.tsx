@@ -1,7 +1,7 @@
 import { ArrowDownLeft, ArrowUpRight, RefreshCw, Undo2 } from "lucide-react";
-import type { Transaction } from "../services/wallet.service";
-import { brl, dateTime } from "../lib/format";
-import { Button } from "./ui/Button";
+import type { Transaction } from "../../services/wallet.service";
+import { brl, dateTime } from "../../lib/format";
+import { Button } from "../ui/Button";
 
 interface Props {
   transactions: Transaction[];

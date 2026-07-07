@@ -1,18 +1,18 @@
 import { useState, useEffect, useCallback } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { brl } from "../lib/format";
-import { Button } from "./ui/Button";
+import { brl } from "../../lib/format";
+import { Button } from "../ui/Button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "./ui/Dialog";
-import { Label } from "./ui/Label";
-import { Input } from "./ui/Input";
-import { userService, type User } from "../services/user.service";
+} from "../ui/Dialog";
+import { Label } from "../ui/Label";
+import { Input } from "../ui/Input";
+import { userService, type User } from "../../services/user.service";
 
 const usernameSchema = z
   .string()
@@ -32,6 +32,8 @@ interface Props {
     amount: number;
   }) => Promise<void>;
   pending: boolean;
+  presetUsername?: string;
+  presetAmount?: number;
 }
 
 export function TransferDialog({
@@ -40,6 +42,8 @@ export function TransferDialog({
   maxAmount,
   onSubmit,
   pending,
+  presetUsername,
+  presetAmount,
 }: Props) {
   const [username, setUsername] = useState("");
   const [amount, setAmount] = useState("");
@@ -49,22 +53,36 @@ export function TransferDialog({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
 
-  const searchUsers = useCallback(async (query: string) => {
-    if (query.length < 2) {
-      setSuggestions([]);
-      return;
-    }
+  const isLocked = !!presetUsername;
 
-    try {
-      setSearchError("");
-      const results = await userService.searchUsers(query);
-      setSuggestions(results);
-      setShowSuggestions(results.length > 0);
-    } catch (e) {
-      setSearchError(e.message);
-      setSuggestions([]);
+  const searchUsers = useCallback(
+    async (query: string) => {
+      if (query.length < 2) {
+        setSuggestions([]);
+        return;
+      }
+
+      try {
+        setSearchError("");
+        const results = await userService.searchUsers(query);
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
+      } catch (e) {
+        setSearchError(e.message);
+        setSuggestions([]);
+      }
+    },
+    [isLocked],
+  );
+
+  useEffect(() => {
+    if (open && presetUsername) {
+      setUsername(presetUsername);
     }
-  }, []);
+    if (open && presetAmount) {
+      setAmount(String(presetAmount).replace(".", ","));
+    }
+  }, [open, presetUsername, presetAmount]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -74,39 +92,48 @@ export function TransferDialog({
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [username, selectedUser, searchUsers]);
+  }, [username, selectedUser, searchUsers, isLocked]);
 
   const handle = async () => {
     setError(null);
 
-    const u = usernameSchema.safeParse(username);
-    if (!u.success) {
-      return setError(u.error.issues[0].message);
+    const usernameResult = usernameSchema.safeParse(username);
+    if (!usernameResult.success) {
+      return setError(usernameResult.error.issues[0].message);
     }
-
     if (!selectedUser) {
       return setError("Selecione um destinatário válido");
     }
 
-    const a = amountSchema.safeParse(Number(amount.replace(",", ".")));
-    if (!a.success) {
-      return setError(a.error.issues[0].message);
+    const destinationAccountUsername = isLocked
+      ? presetUsername
+      : selectedUser?.username;
+
+    if (!destinationAccountUsername) {
+      return setError("Selecione um destinatário válido");
     }
-    if (a.data > maxAmount) {
+
+    const amountResult = amountSchema.safeParse(
+      Number(amount.replace(",", ".")),
+    );
+    if (!amountResult.success) {
+      return setError(amountResult.error.issues[0].message);
+    }
+    if (amountResult.data > maxAmount) {
       return setError(`Saldo insuficiente. Disponível: ${brl(maxAmount)}`);
     }
 
     try {
       await onSubmit({
-        destinationAccountUsername: selectedUser.username,
-        amount: a.data,
+        destinationAccountUsername,
+        amount: amountResult.data,
       });
       setUsername("");
       setAmount("");
       setSelectedUser(null);
       setSuggestions([]);
       toast.success("Transferência realizada com sucesso");
-    } catch (e) {
+    } catch {
       toast.error("Erro ao realizar transferência");
     }
   };
@@ -124,8 +151,10 @@ export function TransferDialog({
         <DialogHeader>
           <DialogTitle>Transferir</DialogTitle>
           <DialogDescription>
-            Envie dinheiro para outro @username. Saldo disponível:{" "}
-            <strong>{brl(maxAmount)}</strong>
+            {isLocked
+              ? "Confirme o pagamento solicitado."
+              : "Envie dinheiro para outro @username."}{" "}
+            Saldo disponível: <strong>{brl(maxAmount)}</strong>
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
@@ -137,17 +166,21 @@ export function TransferDialog({
                 <Input
                   placeholder="username"
                   value={username}
+                  disabled={isLocked}
                   onChange={(e) => {
+                    if (isLocked) return;
                     setUsername(e.target.value);
                     setSelectedUser(null);
                   }}
                   onFocus={() => {
-                    if (suggestions.length > 0) setShowSuggestions(true);
+                    if (!isLocked && suggestions.length > 0) {
+                      setShowSuggestions(true);
+                    }
                   }}
                   onBlur={() => {
                     setTimeout(() => setShowSuggestions(false), 200);
                   }}
-                  autoFocus
+                  autoFocus={!isLocked}
                 />
               </div>
               {searchError ? (
@@ -183,7 +216,11 @@ export function TransferDialog({
               inputMode="decimal"
               placeholder="0,00"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              disabled={isLocked}
+              onChange={(e) => {
+                if (isLocked) return;
+                setAmount(e.target.value);
+              }}
             />
           </div>
           {error && <p className="text-xs text-destructive">{error}</p>}

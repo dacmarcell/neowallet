@@ -13,23 +13,36 @@ import {
   type Transaction,
 } from "../services/wallet.service";
 import { brl } from "../lib/format";
-import { DepositDialog } from "../components/DepositDialog";
-import { TransferDialog } from "../components/TransferDialog";
-import { TransactionsList } from "../components/TransactionsList";
+import { DepositDialog } from "../components/dashboard/DepositDialog";
+import { TransferDialog } from "../components/dashboard/TransferDialog";
+import { TransactionsList } from "../components/dashboard/TransactionsList";
 import { Button } from "../components/ui/Button";
+import { ReceiveDialog } from "../components/dashboard/ReceiveDialog";
+import { useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function Dashboard() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const token = searchParams.get("token");
+
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [depositOpen, setDepositOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
+  const [receiveOpen, setReceiveOpen] = useState(false);
   const [depositPending, setDepositPending] = useState(false);
   const [transferPending, setTransferPending] = useState(false);
+  const [receivePending, setReceivePending] = useState(false);
   const [reversingId, setReversingId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [totalTransactions, setTotalTransactions] = useState(0);
+  const [receiveContext, setReceiveContext] = useState<{
+    username: string;
+    amount: number;
+  } | null>(null);
+
   const { logout } = useAuthSession();
 
   const fetchData = async (page = 1) => {
@@ -83,6 +96,16 @@ export default function Dashboard() {
     }
   };
 
+  const handleReceive = async (amount: number) => {
+    setReceivePending(true);
+    try {
+      await walletService.generateReceiveLink(wallet.id, amount);
+      await fetchData();
+    } finally {
+      setReceivePending(false);
+    }
+  };
+
   const handleReverse = async (txId: number) => {
     setReversingId(txId);
     try {
@@ -98,9 +121,35 @@ export default function Dashboard() {
     window.location.href = "/";
   };
 
+  const manageReceiveToken = async () => {
+    try {
+      const response = await walletService.decryptReceiveLink(token);
+      if (!response.data.is_link_valid) {
+        toast.error("Link expirado");
+        return;
+      }
+
+      setReceiveContext({
+        username: response.data.destination_account_username,
+        amount: response.data.amount,
+      });
+      setTransferOpen(true);
+    } catch (e) {
+      toast.error("Link inválido");
+    } finally {
+      setSearchParams({});
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (token) {
+      manageReceiveToken();
+    }
+  }, [token]);
 
   if (loading) {
     return (
@@ -177,6 +226,13 @@ export default function Dashboard() {
               >
                 <ArrowUpRight className="mr-2 h-4 w-4" /> Transferir
               </Button>
+              <Button
+                onClick={() => setReceiveOpen(true)}
+                size="lg"
+                variant="outline"
+              >
+                <ArrowDownLeft className="mr-2 h-4 w-4" /> Receber
+              </Button>
             </div>
           </div>
         </section>
@@ -209,10 +265,21 @@ export default function Dashboard() {
       />
       <TransferDialog
         open={transferOpen}
-        onOpenChange={setTransferOpen}
+        onOpenChange={(val) => {
+          setTransferOpen(val);
+          if (!val) setReceiveContext(null);
+        }}
+        presetUsername={receiveContext?.username}
+        presetAmount={receiveContext?.amount}
         maxAmount={balance}
         onSubmit={handleTransfer}
         pending={transferPending}
+      />
+      <ReceiveDialog
+        open={receiveOpen}
+        onOpenChange={setReceiveOpen}
+        onSubmit={handleReceive}
+        pending={receivePending}
       />
     </div>
   );

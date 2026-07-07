@@ -12,7 +12,6 @@ use App\Models\Account;
 use App\Models\User;
 use App\Services\AccountService;
 use Illuminate\Http\JsonResponse;
-use Log;
 
 class AccountController extends Controller
 {

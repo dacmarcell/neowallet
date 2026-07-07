@@ -130,7 +130,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "origin_account_id": 7,
+    "destination_account_id": 7,
     "amount": 100
 }
 
@@ -140,5 +140,5 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "token":"eyJpdiI6IlIvRGU4RDdEVjVBcFFmV0dmSUQvdlE9PSIsInZhbHVlIjoicWM1UlhzM0lqQ01DNXd2Yk1TazNZejQ4Ym1tL1VwYUF6Qk9mU2tuSEZrcDA3TWNiOU0vOUhaQThTMFM3Tkc1Rm5LTE91TVBVS0FFa3dNZWN1aEkxZ3c9PSIsIm1hYyI6ImMzMGNkNjIxOTU3MWYyNTUyYTBkYjUwMmQwNzZjNjdjMDk1NjE5ZGQ1YmE5MDE2YWQzODg5MTVhZTE0OGZiOTMiLCJ0YWciOiIifQ=="
+    "token":"eyJpdiI6InZCanBZejFic0hmdi9aRkVHM0VqMkE9PSIsInZhbHVlIjoiS2tQM0ZzVUxmRk81Y3lybSszdWdiTlVJN3FkbVBTcHBsRmZlZWhCQjRnMHJsNFk4Ukd3MFpsVzB3U0xnWkZkRllENk1XdXdWYVNjanRWNjdXa3FiY1F2elVpVHRqMmlQTmNLM3FPZEQ5MEk9IiwibWFjIjoiYmIwNjIwOTQyOTNkYTY0N2U5ZDYxMDA4NmNhMDZmMTA0ZjAzMTc1MDFkNThmMTAzMDE2ZjZlMmY4ZThlYzg4ZiIsInRhZyI6IiJ9"
 }

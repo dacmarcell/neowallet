@@ -74,4 +74,30 @@ export const walletService = {
     const data = await response.json();
     return data;
   },
+
+  async generateReceiveLink(
+    destinationAccountId: number,
+    amount: number,
+  ): Promise<{ link: string }> {
+    const response = await api.post("/v1/transactions/receive-link", {
+      destination_account_id: destinationAccountId,
+      amount,
+    });
+    const data = await response.json();
+    return data;
+  },
+
+  async decryptReceiveLink(token: string): Promise<{
+    data: {
+      destination_account_username: string;
+      amount: number;
+      is_link_valid: boolean;
+    };
+  }> {
+    const response = await api.post("/v1/transactions/decrypt-link", {
+      token,
+    });
+    const data = await response.json();
+    return data;
+  },
 };

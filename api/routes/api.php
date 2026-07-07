@@ -9,22 +9,19 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     // Authentication
     Route::post('auth/login', [AuthController::class, 'login']);
-
     // Public user registration
     Route::post('users', [UserController::class, 'store']);
-
     // Protected routes
     Route::middleware('auth')->group(function () {
         Route::post('auth/logout', [AuthController::class, 'logout']);
         Route::get('auth/me', [AuthController::class, 'me']);
-
+        //Users
         Route::get('users', [UserController::class, 'index']);
         Route::get('users/transfer-search', [UserController::class, 'transferSearch']);
         Route::get('users/{user}', [UserController::class, 'show']);
         Route::put('users/{user}', [UserController::class, 'update']);
         Route::patch('users/{user}', [UserController::class, 'update']);
         Route::delete('users/{user}', [UserController::class, 'destroy']);
-
         // Accounts
         Route::get('accounts', [AccountController::class, 'index']);
         Route::get('accounts/me', [AccountController::class, 'me']);
@@ -35,10 +32,11 @@ Route::prefix('v1')->group(function () {
         Route::delete('accounts/{account}', [AccountController::class, 'destroy']);
         Route::post('accounts/deposit', [AccountController::class, 'deposit']);
         Route::post('accounts/transfer', [AccountController::class, 'transfer']);
-
         // Transactions
         Route::get('transactions', [TransactionController::class, 'index']);
         Route::get('transactions/{transaction}', [TransactionController::class, 'show']);
         Route::post('transactions/{transaction}/reverse', [TransactionController::class, 'reverse']);
+        Route::post("transactions/receive-link", [TransactionController::class, 'receiveLink']);
+        Route::post("transactions/decrypt-link", [TransactionController::class, 'decryptToken']);
     });
 });
