@@ -17,6 +17,7 @@ class AccountResource extends JsonResource
             'updated_at' => $this->updated_at,
             'user' => [
                 'id' => $this->user->id,
+                'username' => $this->user->username,
                 'name' => $this->user->name,
                 'email' => $this->user->email,
             ],
