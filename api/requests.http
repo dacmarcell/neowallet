@@ -54,7 +54,7 @@ Accept: application/json
 GET {{host}}/v1/auth/me
 Accept: application/json
 
-#### Transactions and Deposits
+#### Accounts
 
 ### Get Accounts
 GET {{host}}/v1/accounts
@@ -111,6 +111,8 @@ Content-Type: application/json
     "destination_account_id": 2,
     "amount": 50.00
 }
+
+#### Transactions
 
 ### Get Transactions
 GET {{host}}/v1/transactions?page=3
