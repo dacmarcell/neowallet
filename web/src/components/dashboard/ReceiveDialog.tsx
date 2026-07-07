@@ -11,6 +11,8 @@ import {
 } from "../ui/Dialog";
 import { Label } from "../ui/Label";
 import { Input } from "../ui/Input";
+import { walletService, type Wallet } from "../../services/wallet.service";
+import { Check, Copy } from "lucide-react";
 
 const schema = z
   .number("Valor deve ser um número")
@@ -20,19 +22,45 @@ const schema = z
 
 interface Props {
   open: boolean;
+  wallet: Wallet;
   onOpenChange: (v: boolean) => void;
-  onSubmit: (amount: number) => Promise<void>;
-  pending: boolean;
+  fetchData: (page?: number) => Promise<void>;
 }
 
 export function ReceiveDialog({
   open,
+  wallet,
+  fetchData,
   onOpenChange,
-  onSubmit,
-  pending,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [value, setValue] = useState("");
+  const [receiveLink, setReceiveLink] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [receivePending, setReceivePending] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(receiveLink);
+      setLinkCopied(true);
+      toast.success("Link copiado!");
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      toast.error("Não foi possível copiar o link");
+    }
+  };
+
+  const handleReceive = async (amount: number) => {
+    setReceivePending(true);
+    try {
+      const res = await walletService.generateReceiveLink(wallet.id, amount);
+      setReceiveLink(res.data.link);
+
+      await fetchData();
+    } finally {
+      setReceivePending(false);
+    }
+  };
 
   const handle = async () => {
     setError(null);
@@ -42,7 +70,7 @@ export function ReceiveDialog({
 
     if (!parsed.success) return setError(parsed.error.issues[0].message);
     try {
-      await onSubmit(parsed.data);
+      await handleReceive(parsed.data);
       setValue("");
       toast.success("Solicitação de recebimento enviada com sucesso");
     } catch (e) {
@@ -71,12 +99,32 @@ export function ReceiveDialog({
             />
             {error && <p className="text-xs text-destructive">{error}</p>}
           </div>
+          {receiveLink ? (
+            <div className="space-y-2">
+              <Label>Link de recebimento</Label>
+              <div className="relative">
+                <Input value={receiveLink} readOnly className="pr-10" />
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Copiar link"
+                >
+                  {linkCopied ? (
+                    <Check className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+          ) : null}
           <Button
             className="w-full btn-glow"
             onClick={handle}
-            disabled={pending}
+            disabled={receivePending}
           >
-            {pending
+            {receivePending
               ? "Processando..."
               : "Confirmar solicitação de recebimento"}
           </Button>

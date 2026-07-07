@@ -31,9 +31,6 @@ export default function Dashboard() {
   const [depositOpen, setDepositOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [receiveOpen, setReceiveOpen] = useState(false);
-  const [depositPending, setDepositPending] = useState(false);
-  const [transferPending, setTransferPending] = useState(false);
-  const [receivePending, setReceivePending] = useState(false);
   const [reversingId, setReversingId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
@@ -67,43 +64,6 @@ export default function Dashboard() {
   const handlePageChange = (page: number) => {
     setLoading(true);
     fetchData(page);
-  };
-
-  const handleDeposit = async (amount: number) => {
-    setDepositPending(true);
-    try {
-      await walletService.deposit(wallet!.id, amount);
-      await fetchData();
-    } finally {
-      setDepositPending(false);
-    }
-  };
-
-  const handleTransfer = async (input: {
-    destinationAccountUsername: string;
-    amount: number;
-  }) => {
-    setTransferPending(true);
-    try {
-      await walletService.transfer(
-        wallet!.id,
-        input.destinationAccountUsername,
-        input.amount,
-      );
-      await fetchData();
-    } finally {
-      setTransferPending(false);
-    }
-  };
-
-  const handleReceive = async (amount: number) => {
-    setReceivePending(true);
-    try {
-      await walletService.generateReceiveLink(wallet.id, amount);
-      await fetchData();
-    } finally {
-      setReceivePending(false);
-    }
   };
 
   const handleReverse = async (txId: number) => {
@@ -260,8 +220,8 @@ export default function Dashboard() {
       <DepositDialog
         open={depositOpen}
         onOpenChange={setDepositOpen}
-        onSubmit={handleDeposit}
-        pending={depositPending}
+        wallet={wallet}
+        fetchData={fetchData}
       />
       <TransferDialog
         open={transferOpen}
@@ -272,14 +232,14 @@ export default function Dashboard() {
         presetUsername={receiveContext?.username}
         presetAmount={receiveContext?.amount}
         maxAmount={balance}
-        onSubmit={handleTransfer}
-        pending={transferPending}
+        fetchData={fetchData}
+        wallet={wallet}
       />
       <ReceiveDialog
+        wallet={wallet}
         open={receiveOpen}
+        fetchData={fetchData}
         onOpenChange={setReceiveOpen}
-        onSubmit={handleReceive}
-        pending={receivePending}
       />
     </div>
   );

@@ -13,6 +13,7 @@ import {
 import { Label } from "../ui/Label";
 import { Input } from "../ui/Input";
 import { userService, type User } from "../../services/user.service";
+import { walletService, type Wallet } from "../../services/wallet.service";
 
 const usernameSchema = z
   .string()
@@ -27,23 +28,20 @@ interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   maxAmount: number;
-  onSubmit: (input: {
-    destinationAccountUsername: string;
-    amount: number;
-  }) => Promise<void>;
-  pending: boolean;
   presetUsername?: string;
   presetAmount?: number;
+  fetchData: (page?: number) => void;
+  wallet: Wallet;
 }
 
 export function TransferDialog({
   open,
   onOpenChange,
   maxAmount,
-  onSubmit,
-  pending,
   presetUsername,
   presetAmount,
+  fetchData,
+  wallet,
 }: Props) {
   const [username, setUsername] = useState("");
   const [amount, setAmount] = useState("");
@@ -52,6 +50,7 @@ export function TransferDialog({
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [transferPending, setTransferPending] = useState(false);
 
   const isLocked = !!presetUsername;
 
@@ -93,6 +92,23 @@ export function TransferDialog({
 
     return () => clearTimeout(timer);
   }, [username, selectedUser, searchUsers, isLocked]);
+
+  const onSubmit = async (input: {
+    destinationAccountUsername: string;
+    amount: number;
+  }) => {
+    setTransferPending(true);
+    try {
+      await walletService.transfer(
+        wallet.id,
+        input.destinationAccountUsername,
+        input.amount,
+      );
+      await fetchData();
+    } finally {
+      setTransferPending(false);
+    }
+  };
 
   const handle = async () => {
     setError(null);
@@ -227,9 +243,9 @@ export function TransferDialog({
           <Button
             className="w-full btn-glow"
             onClick={handle}
-            disabled={pending}
+            disabled={transferPending}
           >
-            {pending ? "Enviando..." : "Confirmar transferência"}
+            {transferPending ? "Enviando..." : "Confirmar transferência"}
           </Button>
         </div>
       </DialogContent>

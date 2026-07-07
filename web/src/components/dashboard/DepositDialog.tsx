@@ -11,6 +11,7 @@ import {
 } from "../ui/Dialog";
 import { Label } from "../ui/Label";
 import { Input } from "../ui/Input";
+import { walletService, type Wallet } from "../../services/wallet.service";
 
 const schema = z
   .number("Valor deve ser um número")
@@ -21,18 +22,29 @@ const schema = z
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  onSubmit: (amount: number) => Promise<void>;
-  pending: boolean;
+  fetchData: () => Promise<void>;
+  wallet: Wallet;
 }
 
 export function DepositDialog({
   open,
   onOpenChange,
-  onSubmit,
-  pending,
+  fetchData,
+  wallet,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [value, setValue] = useState("");
+  const [depositPending, setDepositPending] = useState(false);
+
+  const onSubmit = async (amount: number) => {
+    setDepositPending(true);
+    try {
+      await walletService.deposit(wallet.id, amount);
+      await fetchData();
+    } finally {
+      setDepositPending(false);
+    }
+  };
 
   const handle = async () => {
     setError(null);
@@ -72,9 +84,9 @@ export function DepositDialog({
           <Button
             className="w-full btn-glow"
             onClick={handle}
-            disabled={pending}
+            disabled={depositPending}
           >
-            {pending ? "Processando..." : "Confirmar depósito"}
+            {depositPending ? "Processando..." : "Confirmar depósito"}
           </Button>
         </div>
       </DialogContent>
