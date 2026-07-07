@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Account;
 use App\Models\Transaction;
 use Crypt;
+use Exception;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -13,6 +14,10 @@ class TransactionService
     public function getAllTransactions(): LengthAwarePaginator
     {
         $accountId = auth()->user()->account->id;
+
+        if(!$accountId) {
+            throw new Exception('Usuário não possui conta');
+        }
 
         return Transaction::with(['originAccount.user', 'destinationAccount.user'])
             ->where('origin_account_id', $accountId)
