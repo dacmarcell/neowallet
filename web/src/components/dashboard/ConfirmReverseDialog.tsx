@@ -43,11 +43,13 @@ export default function ConfirmReverseDialog({
         {pendingReversal && (
           <div className="rounded-lg bg-muted p-3 text-sm">
             <p className="font-medium">{brl(pendingReversal.amount)}</p>
-            {pendingReversal.origin_account?.username && (
-              <p className="text-xs text-gray-600">
-                @{pendingReversal.origin_account.username}
-              </p>
-            )}
+            {pendingReversal.origin_account?.username &&
+              pendingReversal.destination_account?.username && (
+                <p className="text-xs text-gray-600">
+                  de @{pendingReversal.origin_account.username} para @
+                  {pendingReversal.destination_account.username}
+                </p>
+              )}
             <p className="text-xs text-gray-500">
               {dateTime(pendingReversal.created_at)}
             </p>
