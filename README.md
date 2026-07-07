@@ -48,3 +48,28 @@ docker compose up --build
 - As transações ficam registradas no histórico das contas de origem e destino.
 - O histórico de transações é paginado.
 - O saldo da conta é calculado dinamicamente a partir das transações.
+
+### Testes
+
+O projeto possui testes de integração para garantir o funcionamento das principais regras de negócio da API.
+
+Os testes cobrem:
+
+- CRUD de usuários
+- Transferências entre contas
+- Atualização de saldo após transferências
+- Histórico de transações
+- Paginação de transações
+- Validações de regras de negócio (saldo insuficiente, transferência para a própria conta e contas inexistentes)
+
+Para executar os testes:
+
+```bash
+docker compose exec api php artisan test
+```
+
+ou
+
+```bash
+php artisan test
+```
