@@ -78,7 +78,7 @@ export const walletService = {
   async generateReceiveLink(
     destinationAccountId: number,
     amount: number,
-  ): Promise<{ link: string }> {
+  ): Promise<{ data: { link: string } }> {
     const response = await api.post("/v1/transactions/receive-link", {
       destination_account_id: destinationAccountId,
       amount,
