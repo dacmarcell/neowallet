@@ -42,7 +42,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "email": "johndoe@email.com",
+    "email": "joao@email.com",
     "password": "password"
 }
 
@@ -113,7 +113,7 @@ Content-Type: application/json
 }
 
 ### Get Transactions
-GET {{host}}/v1/transactions
+GET {{host}}/v1/transactions?page=3
 Accept: application/json
 
 ### Get Transaction by ID
