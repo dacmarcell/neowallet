@@ -25,6 +25,8 @@ test('can create user', function () {
 
 test("can find user", function () {
     $user = User::factory()->create();
+    $this->actingAs($user);
+
     $response = $this->getJson("/api/v1/users/{$user->id}");
     $response->assertOk()->assertJsonFragment([
         'id' => $user->id,
@@ -34,6 +36,8 @@ test("can find user", function () {
 
 test("can update user", function (){
     $user = User::factory()->create();
+    $this->actingAs($user);
+
     $response = $this->putJson("/api/v1/users/{$user->id}", [
         'name' => 'New test name',
     ]);
@@ -47,6 +51,8 @@ test("can update user", function (){
 
 test("can delete user", function () {
     $user = User::factory()->create();
+    $this->actingAs($user);
+
     $response = $this->deleteJson("/api/v1/users/{$user->id}");
     $response->assertNoContent();
 
