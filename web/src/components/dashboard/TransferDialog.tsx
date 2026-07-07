@@ -235,7 +235,9 @@ export function TransferDialog({
               disabled={isLocked}
               onChange={(e) => {
                 if (isLocked) return;
-                setAmount(e.target.value);
+                const value = e.target.value;
+                if (!/^\d*[.,]?\d*$/.test(value)) return;
+                setAmount(value);
               }}
             />
           </div>

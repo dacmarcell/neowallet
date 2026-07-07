@@ -76,7 +76,11 @@ export function DepositDialog({
               inputMode="decimal"
               placeholder="0,00"
               value={value}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (!/^\d*[.,]?\d*$/.test(value)) return;
+                setValue(value);
+              }}
               autoFocus
             />
             {error && <p className="text-xs text-destructive">{error}</p>}

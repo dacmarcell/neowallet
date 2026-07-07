@@ -128,11 +128,13 @@ function TransactionRow({
         </div>
         <div>
           <p className="text-sm font-medium">{meta.title}</p>
-          {transaction.origin_account?.username && (
-            <p className="text-xs text-gray-600">
-              @{transaction.origin_account.username}
-            </p>
-          )}
+          {transaction.origin_account?.username &&
+            transaction.destination_account?.username && (
+              <p className="text-xs text-gray-600">
+                de @{transaction.origin_account.username} para @
+                {transaction.destination_account.username}
+              </p>
+            )}
           <p className="text-xs text-gray-500">
             {dateTime(transaction.created_at)}
             {transaction.reversed ? " · revertida" : ""}
