@@ -79,7 +79,6 @@ export default function SignUpForm() {
             onChange={(e) => setForm({ ...form, username: e.target.value })}
           />
         </div>
-        {error && <p className="text-xs text-destructive">{error}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="email-signup">E-mail</Label>
