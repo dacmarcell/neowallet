@@ -13,11 +13,13 @@ class TransactionService
 {
     public function getAllTransactions(): LengthAwarePaginator
     {
-        $accountId = auth()->user()->account->id;
+        $user = auth()->user();
 
-        if(!$accountId) {
+        if (!$user?->account) {
             throw new Exception('Usuário não possui conta');
         }
+
+        $accountId = $user->account->id;
 
         return Transaction::with(['originAccount.user', 'destinationAccount.user'])
             ->where('origin_account_id', $accountId)
